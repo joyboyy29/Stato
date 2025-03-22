@@ -5,6 +5,7 @@
 #include <optional>
 #include <array>
 #include <ostream>
+#include <format>
 
 namespace Stato {
     enum class status : int {
@@ -88,4 +89,18 @@ namespace Stato {
     inline status safe_status(int code) {
         return is_valid_status(code) ? static_cast<status>(code) : status::unknown;
     }
+}
+
+// support for std::format, std::print, std::println
+namespace std {
+    template <>
+    struct formatter<Stato::status, char> {
+        constexpr auto parse(basic_format_parse_context<char>& ctx) -> decltype(ctx.begin()) {
+            return ctx.begin();
+        }
+        
+        auto format(const Stato::status& s, format_context& ctx) const -> decltype(ctx.out()) {
+            return format_to(ctx.out(), "{}", Stato::to_string(s));
+        }
+    };
 }
